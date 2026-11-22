@@ -1,0 +1,57 @@
+{
+  "regression": {
+    "r2": 0.932,
+    "n": 4705,
+    "yield_pts_per_1pct_ffa": -1.061,
+    "yield_pts_per_1pct_bleaching_earth": -0.406,
+    "line_C_penalty_pts": -0.292
+  },
+  "classification": {
+    "roc_auc": 0.971,
+    "recall_offspec": 0.867,
+    "precision_offspec": 0.504,
+    "test_batches": 1160,
+    "top_drivers": [
+      "Deodorizer temperature",
+      "CPO DOBI",
+      "Deodorizer vacuum"
+    ]
+  },
+  "clustering": {
+    "k": 3,
+    "silhouette": 0.376,
+    "segments": [
+      {
+        "segment": "Premium crude",
+        "batches": 1913,
+        "cpo_ffa": 3.285,
+        "dobi": 2.852,
+        "bleaching_earth": 0.827,
+        "yield_pct": 95.115,
+        "off_spec": 3.93
+      },
+      {
+        "segment": "Standard crude",
+        "batches": 1755,
+        "cpo_ffa": 3.869,
+        "dobi": 2.499,
+        "bleaching_earth": 0.973,
+        "yield_pct": 94.443,
+        "off_spec": 5.351
+      },
+      {
+        "segment": "Challenging crude",
+        "batches": 1037,
+        "cpo_ffa": 4.532,
+        "dobi": 2.077,
+        "bleaching_earth": 1.156,
+        "yield_pct": 93.651,
+        "off_spec": 12.894
+      }
+    ]
+  },
+  "anomalies": {
+    "count": 48,
+    "median_abs_steam_deviation_pct": 24.4
+  }
+}

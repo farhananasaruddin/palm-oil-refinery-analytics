@@ -1,0 +1,5 @@
+dobi_band,batches,avg_bleaching_earth_pct,avg_color_red,dark_colour_rate_pct
+1) < 2.0 (poor),352,1.253,2.81,13.49
+2) 2.0 - 2.3 (fair),772,1.121,2.63,2.62
+3) 2.3 - 2.6 (good),1267,0.99,2.43,0.32
+4) >= 2.6 (excellent),2314,0.833,2.16,0.0

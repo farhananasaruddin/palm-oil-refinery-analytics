@@ -1,0 +1,8 @@
+category,events,hours,pct_of_total,cumulative_pct
+Vacuum System,67,155.1,22.9,22.9
+Mechanical,83,151.1,22.3,45.2
+Planned Maintenance,18,113.8,16.8,62.0
+Feedstock Shortage,25,86.2,12.7,74.8
+Filtration,62,83.1,12.3,87.1
+Utilities,33,48.0,7.1,94.2
+Electrical,32,39.5,5.8,100.0

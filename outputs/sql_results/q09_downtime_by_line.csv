@@ -1,0 +1,4 @@
+line_code,commissioned_year,unplanned_events,unplanned_hours,hours_per_kt_cpo,mtbf_hours
+A,2012,60,102.3,0.33,219.0
+B,2016,73,132.5,0.43,180.0
+C,2005,169,328.1,1.5,78.0

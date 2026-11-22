@@ -1,0 +1,24 @@
+step_no,source_table,rule,action,rows_affected
+1,stg_batch_production,Duplicate batch_id rows,Kept first occurrence,71
+2,stg_batch_production,"Non-ISO date formats (DD/MM/YYYY, DD-Mon-YYYY)",Parsed to YYYY-MM-DD,1355
+3,stg_batch_production,Unparseable dates,Row excluded,0
+4,stg_batch_production,"Inconsistent line labels (LINE-A, line a, A)",Standardised to A/B/C,2355
+5,stg_batch_production,"Inconsistent shift labels (AM, PM, NIGHT SHIFT)",Standardised to Morning/Evening/Night,2339
+6,stg_batch_production,Supplier name typos / abbreviations / casing,Mapped to supplier_id via alias table,3207
+7,stg_batch_production,Unmapped supplier names,Left NULL - add to alias table,0
+8,stg_batch_production,CPO FFA entered as fraction (< 1),Multiplied by 100,94
+9,stg_batch_production,Deodorizer temp > 1000 C (decimal lost),Divided by 10,22
+10,stg_batch_production,Deodorizer temp missing (blank / N/A / -),Imputed with line average,47
+11,stg_batch_production,Negative CPO input tonnage,Absolute value taken,14
+12,stg_batch_production,CPO input missing,Back-calculated from mass balance,18
+13,stg_batch_production,RBDPO output missing,Back-calculated from mass balance,23
+14,stg_batch_production,CPO DOBI missing,Left NULL (excluded from DOBI analysis only),37
+15,stg_lab_results,Re-tests (multiple samples per batch),Kept latest test result,180
+16,stg_lab_results,"FFA below detection limit (""<0.03"")",Set to detection limit 0.03,494
+17,stg_lab_results,"Colour recorded with unit suffix (""2.8R"")","Suffix stripped, cast to number",384
+18,stg_lab_results,Moisture result blank,Left NULL,55
+19,stg_energy_readings,Electricity reported in MWh,Converted to kWh (x1000),257
+20,fact_batch,Batches with no LIMS result,Kept; excluded from quality KPIs,68
+21,fact_batch,Refining yield outside 85-99 % (sanity check),Flagged for review,0
+22,stg_downtime_log,"Category casing inconsistent (VACUUM SYSTEM, mechanical)",Standardised to Title Case,166
+23,stg_downtime_log,Event with no end time,Duration imputed with category average,6

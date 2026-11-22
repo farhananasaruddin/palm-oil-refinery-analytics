@@ -1,0 +1,7 @@
+supplier_id,supplier_name,supplier_region,certification,batches,cpo_supplied_mt,wtd_cpo_ffa_pct,avg_dobi,avg_bleaching_earth_pct,refining_yield_pct,off_spec_rate_pct,margin_myr_per_t,yield_rank,margin_rank
+SUP01,Ladang Sungai Mas Mill,Peninsular,MSPO + RSPO,1004,179000.0,3.28,2.88,0.81,95.16,4.36,143.2,1,1
+SUP06,Permatang Jaya Mill,Peninsular,MSPO,848,150098.0,3.47,2.76,0.87,94.92,4.41,141.1,2,2
+SUP02,Bukit Hijau Palm Oil Mill,Peninsular,MSPO + RSPO,966,171846.0,3.63,2.65,0.91,94.74,4.4,140.7,3,3
+SUP03,Kuala Teras Mill,Peninsular,MSPO,783,138886.0,4.0,2.4,1.02,94.31,5.79,134.1,4,4
+SUP05,Tanjung Emas Mill,East Malaysia,MSPO + RSPO,591,103160.0,4.22,2.24,1.09,94.04,9.5,133.8,5,5
+SUP04,Seri Mutiara Mill,East Malaysia,MSPO,550,96712.0,4.62,1.99,1.19,93.57,14.31,127.2,6,6

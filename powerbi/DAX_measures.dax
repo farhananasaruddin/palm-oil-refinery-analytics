@@ -1,0 +1,152 @@
+// =============================================================================
+//  DAX MEASURES  -  Palm Oil Refinery Operations Dashboard
+//  Create a blank table called _Measures (Home > Enter data > OK) and add each
+//  measure below to it. Display folders are suggested in the comments.
+//  Ratios are always SUM/SUM (weighted), never an average of row-level ratios.
+// =============================================================================
+
+// ---------- Folder: 1 Volume ---------------------------------------------------
+CPO Processed (t) = SUM ( fact_batch[cpo_input_mt] )
+
+RBDPO Produced (t) = SUM ( fact_batch[rbdpo_output_mt] )
+
+PFAD Produced (t) = SUM ( fact_batch[pfad_output_mt] )
+
+Batches = COUNTROWS ( fact_batch )
+
+Capacity Utilisation % =
+VAR _days = COUNTROWS ( dim_date )
+VAR _capacity = SUMX ( VALUES ( dim_line[line_code] ), CALCULATE ( MAX ( dim_line[design_capacity_tpd] ) ) ) * _days
+RETURN DIVIDE ( [CPO Processed (t)], _capacity )
+
+// ---------- Folder: 2 Yield ----------------------------------------------------
+Refining Yield % = DIVIDE ( [RBDPO Produced (t)], [CPO Processed (t)] )
+
+PFAD Yield % = DIVIDE ( [PFAD Produced (t)], [CPO Processed (t)] )
+
+Refining Loss % = 1 - DIVIDE ( [RBDPO Produced (t)] + [PFAD Produced (t)], [CPO Processed (t)] )
+
+Target Yield % = 0.95          // or replace with a What-if parameter
+
+Yield vs Target (pts) = ( [Refining Yield %] - [Target Yield %] ) * 100
+
+Yield Prev Month % =
+CALCULATE ( [Refining Yield %], DATEADD ( dim_date[date_key], -1, MONTH ) )
+
+Yield MoM Change (pts) =
+IF ( NOT ISBLANK ( [Yield Prev Month %] ), ( [Refining Yield %] - [Yield Prev Month %] ) * 100 )
+
+Yield 30-Day Rolling % =
+CALCULATE (
+    [Refining Yield %],
+    DATESINPERIOD ( dim_date[date_key], MAX ( dim_date[date_key] ), -30, DAY )
+)
+
+Yield Status Colour =
+IF ( [Refining Yield %] >= [Target Yield %], "#0CA30C", "#D03B3B" )     // use in Conditional formatting > Field value
+
+// ---------- Folder: 3 Feedstock quality ---------------------------------------
+Wtd CPO FFA % =
+DIVIDE ( SUMX ( fact_batch, fact_batch[cpo_input_mt] * fact_batch[cpo_ffa_pct] ), [CPO Processed (t)] )
+
+Avg CPO DOBI = AVERAGE ( fact_batch[cpo_dobi] )
+
+Avg Bleaching Earth % = AVERAGE ( fact_batch[bleaching_earth_pct] )
+
+Bleaching Earth Used (t) =
+SUMX ( fact_batch, fact_batch[cpo_input_mt] * fact_batch[bleaching_earth_pct] / 100 )
+
+// ---------- Folder: 4 Product quality -----------------------------------------
+Lab Tested Batches = CALCULATE ( [Batches], fact_batch[has_lab_result] = 1 )
+
+Off-spec Batches = CALCULATE ( [Batches], fact_batch[is_off_spec] = 1 )
+
+Off-spec Rate % = DIVIDE ( [Off-spec Batches], [Lab Tested Batches] )
+
+High FFA Batches = CALCULATE ( [Batches], fact_batch[rbdpo_ffa_pct] > 0.10 )
+
+Dark Colour Batches = CALCULATE ( [Batches], fact_batch[color_red] > 3.0 )
+
+Avg RBDPO FFA % = AVERAGE ( fact_batch[rbdpo_ffa_pct] )
+
+Avg Colour (R) = AVERAGE ( fact_batch[color_red] )
+
+First Pass Quality % = 1 - [Off-spec Rate %]
+
+// ---------- Folder: 5 Energy ---------------------------------------------------
+Steam Intensity (t/t) = DIVIDE ( SUM ( fact_batch[steam_mt] ), [CPO Processed (t)] )
+
+Power Intensity (kWh/t) = DIVIDE ( SUM ( fact_batch[electricity_kwh] ), [CPO Processed (t)] )
+
+Avg Deodorizer Temp (C) = AVERAGE ( fact_batch[deo_temp_c] )
+
+// ---------- Folder: 6 Financial (gross refining margin, excl. processing cost) -
+//  fact_batch -> dim_date -> fact_market_price is a chain of many-to-one
+//  relationships, so RELATED() can reach the monthly price from each batch.
+Product Value (MYR) =
+SUMX (
+    fact_batch,
+    fact_batch[rbdpo_output_mt] * RELATED ( fact_market_price[rbdpo_price_myr_mt] )
+        + fact_batch[pfad_output_mt] * RELATED ( fact_market_price[pfad_price_myr_mt] )
+)
+
+Feedstock Cost (MYR) =
+SUMX ( fact_batch, fact_batch[cpo_input_mt] * RELATED ( fact_market_price[cpo_price_myr_mt] ) )
+
+Gross Refining Margin (MYR) = [Product Value (MYR)] - [Feedstock Cost (MYR)]
+
+Margin per Tonne (MYR/t) = DIVIDE ( [Gross Refining Margin (MYR)], [CPO Processed (t)] )
+
+// ---------- Folder: 7 Supplier benchmarking -----------------------------------
+Best Supplier Yield % =
+MAXX ( ALLSELECTED ( dim_supplier[supplier_name] ), [Refining Yield %] )
+
+Supplier Yield Gap (pts) = ( [Best Supplier Yield %] - [Refining Yield %] ) * 100
+
+Supplier Opportunity (MYR) =
+SUMX (
+    VALUES ( dim_supplier[supplier_name] ),
+    VAR _gap = [Best Supplier Yield %] - [Refining Yield %]
+    VAR _price = CALCULATE ( AVERAGE ( fact_market_price[rbdpo_price_myr_mt] ), ALL ( fact_market_price ) )
+    RETURN _gap * [CPO Processed (t)] * _price
+)
+
+Supplier Yield Rank =
+RANKX ( ALLSELECTED ( dim_supplier[supplier_name] ), [Refining Yield %], , DESC, DENSE )
+
+// ---------- Folder: 8 Reliability ---------------------------------------------
+Downtime Events = COUNTROWS ( fact_downtime )
+
+Downtime Hours = DIVIDE ( SUM ( fact_downtime[duration_min] ), 60 )
+
+Unplanned Downtime Hours = CALCULATE ( [Downtime Hours], fact_downtime[is_planned] = 0 )
+
+Unplanned Events = CALCULATE ( [Downtime Events], fact_downtime[is_planned] = 0 )
+
+Line-Hours in Period = COUNTROWS ( dim_date ) * 24 * COUNTROWS ( VALUES ( dim_line[line_code] ) )
+
+Availability % = 1 - DIVIDE ( [Downtime Hours], [Line-Hours in Period] )
+
+MTBF (h) = DIVIDE ( [Line-Hours in Period], [Unplanned Events] )      // mean time between failures
+
+MTTR (h) = DIVIDE ( [Unplanned Downtime Hours], [Unplanned Events] )   // mean time to repair
+
+Downtime Cumulative % =
+VAR _current = [Downtime Hours]
+VAR _total = CALCULATE ( [Downtime Hours], ALLSELECTED ( fact_downtime[category] ) )
+VAR _running =
+    SUMX (
+        FILTER ( ALLSELECTED ( fact_downtime[category] ), [Downtime Hours] >= _current ),
+        [Downtime Hours]
+    )
+RETURN DIVIDE ( _running, _total )
+
+// ---------- Folder: 9 Dynamic titles ------------------------------------------
+Title Overview =
+"Refinery performance  |  "
+    & SELECTEDVALUE ( dim_line[line_name], "All lines" ) & "  |  "
+    & FORMAT ( MIN ( dim_date[date_key] ), "mmm yyyy" ) & " - "
+    & FORMAT ( MAX ( dim_date[date_key] ), "mmm yyyy" )
+
+Title Supplier =
+"Refining yield by supplier - " & SELECTEDVALUE ( dim_line[line_name], "all lines" )

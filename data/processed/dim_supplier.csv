@@ -1,0 +1,7 @@
+supplier_id,supplier_name,state,region,certification,distance_km,contract_start
+SUP01,Ladang Sungai Mas Mill,Johor,Peninsular,MSPO + RSPO,45.0,2019-03-01
+SUP02,Bukit Hijau Palm Oil Mill,Pahang,Peninsular,MSPO + RSPO,160.0,2020-07-15
+SUP03,Kuala Teras Mill,Perak,Peninsular,MSPO,310.0,2021-01-10
+SUP04,Seri Mutiara Mill,Sabah,East Malaysia,MSPO,1650.0,2022-05-01
+SUP05,Tanjung Emas Mill,Sarawak,East Malaysia,MSPO + RSPO,1100.0,2021-09-20
+SUP06,Permatang Jaya Mill,Selangor,Peninsular,MSPO,120.0,2018-11-05
